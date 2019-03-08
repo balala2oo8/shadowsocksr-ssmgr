@@ -63,7 +63,7 @@ class TransferBase(object):
 				self.onlineuser_cache[id] = curr_transfer[id][0] + curr_transfer[id][1]
 
 		self.onlineuser_cache.sweep()
-
+		
 		update_transfer = self.update_all_user(dt_transfer) #返回有更新的表
 		for id in update_transfer.keys(): #其增量加在此表
 			if id not in self.force_update_transfer: #但排除在force_update_transfer内的
@@ -451,6 +451,8 @@ class Dbv3Transfer(DbTransfer):
 					db=self.cfg["db"], charset='utf8')
 		conn.autocommit(True)
 
+		save_flow=''
+
 		for id in dt_transfer.keys():
 			transfer = dt_transfer[id]
 			bandwidth_thistime = bandwidth_thistime + transfer[0] + transfer[1]
@@ -461,7 +463,8 @@ class Dbv3Transfer(DbTransfer):
 				continue
 			if id in self.user_pass:
 				del self.user_pass[id]
-
+				
+			save_flow += 'INSERT INTO `saveFlow`(`id`, `accountId`, `port`, `flow`, `time`) SELECT %s,accountId,%s,%s,%s FROM `account_flow` WHERE port=%s AND serverId=%s;' %(str(self.cfg["node_id"]),id,int(transfer[0])+int(transfer[1]),str(int(last_time))+'000',id,str(self.cfg["node_id"]))
 			query_sub_when += ' WHEN %s THEN u+%s' % (id, int(transfer[0] * self.cfg["transfer_mul"]))
 			query_sub_when2 += ' WHEN %s THEN d+%s' % (id, int(transfer[1] * self.cfg["transfer_mul"]))
 			update_transfer[id] = transfer
@@ -488,6 +491,7 @@ class Dbv3Transfer(DbTransfer):
 						' END, d = CASE port' + query_sub_when2 + \
 						' END, t = ' + str(int(last_time)) + \
 						' WHERE port IN (%s)' % query_sub_in
+			'[UPDATE user SET u = CASE port WHEN 17000 THEN u+26462 END, d = CASE port WHEN 17000 THEN d+11608871 END, t = 1552057133 WHERE port IN (17000)'
 			cur = conn.cursor()
 			try:
 				cur.execute(query_sql)
@@ -528,29 +532,29 @@ class Dbv3Transfer(DbTransfer):
 
 		cur = conn.cursor()
 
-		if self.update_node_state:
-			node_info_keys = ['traffic_rate']
-			try:
-				cur.execute("SELECT " + ','.join(node_info_keys) +" FROM ss_node where `id`='" + str(self.cfg["node_id"]) + "'")
-				nodeinfo = cur.fetchone()
-			except Exception as e:
-				logging.error(e)
-				nodeinfo = None
+		# if self.update_node_state:
+		# 	node_info_keys = ['traffic_rate']
+		# 	try:
+		# 		cur.execute("SELECT " + ','.join(node_info_keys) +" FROM ss_node where `id`='" + str(self.cfg["node_id"]) + "'")
+		# 		nodeinfo = cur.fetchone()
+		# 	except Exception as e:
+		# 		logging.error(e)
+		# 		nodeinfo = None
 
-			if nodeinfo == None:
-				rows = []
-				cur.close()
-				conn.commit()
-				logging.warn('None result when select node info from ss_node in db, maybe you set the incorrect node id')
-				return rows
-			cur.close()
+		# 	if nodeinfo == None:
+		# 		rows = []
+		# 		cur.close()
+		# 		conn.commit()
+		# 		logging.warn('None result when select node info from ss_node in db, maybe you set the incorrect node id')
+		# 		return rows
+		# 	cur.close()
 
-			node_info_dict = {}
-			for column in range(len(nodeinfo)):
-				node_info_dict[node_info_keys[column]] = nodeinfo[column]
-			self.cfg['transfer_mul'] = float(node_info_dict['traffic_rate'])
+		# 	node_info_dict = {}
+		# 	for column in range(len(nodeinfo)):
+		# 		node_info_dict[node_info_keys[column]] = nodeinfo[column]
+		# 	self.cfg['transfer_mul'] = float(node_info_dict['traffic_rate'])
 
-		cur = conn.cursor()
+		# cur = conn.cursor()
 		try:
 			rows = []
 			cur.execute("SELECT " + ','.join(keys) + " FROM user where serverId="+str(self.cfg["node_id"]))
