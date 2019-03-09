@@ -412,7 +412,8 @@ class DbTransfer(TransferBase):
 class Dbv3Transfer(DbTransfer):
 	def __init__(self):
 		super(Dbv3Transfer, self).__init__()
-		self.update_node_state = True if get_config().API_INTERFACE != 'legendsockssr' else False
+		self.update_node_state = False
+		#self.update_node_state = True if get_config().API_INTERFACE != 'legendsockssr' else False
 		if self.update_node_state:
 			self.key_list += ['id']
 		self.key_list += ['method']
@@ -485,13 +486,20 @@ class Dbv3Transfer(DbTransfer):
 				query_sub_in += ',%s' % id
 			else:
 				query_sub_in = '%s' % id
+		#计入流量
+		if save_flow != '':
+			cur = conn.cursor()
+			try:
+				cur.execute(save_flow)
+			except Exception as e:
+				logging.error(e)
+			cur.close()
 
 		if query_sub_when != '':
 			query_sql = query_head + ' SET u = CASE port' + query_sub_when + \
 						' END, d = CASE port' + query_sub_when2 + \
 						' END, t = ' + str(int(last_time)) + \
 						' WHERE port IN (%s)' % query_sub_in
-			'[UPDATE user SET u = CASE port WHEN 17000 THEN u+26462 END, d = CASE port WHEN 17000 THEN d+11608871 END, t = 1552057133 WHERE port IN (17000)'
 			cur = conn.cursor()
 			try:
 				cur.execute(query_sql)
@@ -532,29 +540,29 @@ class Dbv3Transfer(DbTransfer):
 
 		cur = conn.cursor()
 
-		# if self.update_node_state:
-		# 	node_info_keys = ['traffic_rate']
-		# 	try:
-		# 		cur.execute("SELECT " + ','.join(node_info_keys) +" FROM ss_node where `id`='" + str(self.cfg["node_id"]) + "'")
-		# 		nodeinfo = cur.fetchone()
-		# 	except Exception as e:
-		# 		logging.error(e)
-		# 		nodeinfo = None
+		if self.update_node_state:
+			node_info_keys = ['traffic_rate']
+			try:
+				cur.execute("SELECT " + ','.join(node_info_keys) +" FROM ss_node where `id`='" + str(self.cfg["node_id"]) + "'")
+				nodeinfo = cur.fetchone()
+			except Exception as e:
+				logging.error(e)
+				nodeinfo = None
 
-		# 	if nodeinfo == None:
-		# 		rows = []
-		# 		cur.close()
-		# 		conn.commit()
-		# 		logging.warn('None result when select node info from ss_node in db, maybe you set the incorrect node id')
-		# 		return rows
-		# 	cur.close()
+			if nodeinfo == None:
+				rows = []
+				cur.close()
+				conn.commit()
+				logging.warn('None result when select node info from ss_node in db, maybe you set the incorrect node id')
+				return rows
+			cur.close()
 
-		# 	node_info_dict = {}
-		# 	for column in range(len(nodeinfo)):
-		# 		node_info_dict[node_info_keys[column]] = nodeinfo[column]
-		# 	self.cfg['transfer_mul'] = float(node_info_dict['traffic_rate'])
+			node_info_dict = {}
+			for column in range(len(nodeinfo)):
+				node_info_dict[node_info_keys[column]] = nodeinfo[column]
+			self.cfg['transfer_mul'] = float(node_info_dict['traffic_rate'])
 
-		# cur = conn.cursor()
+		cur = conn.cursor()
 		try:
 			rows = []
 			cur.execute("SELECT " + ','.join(keys) + " FROM user where serverId="+str(self.cfg["node_id"]))
