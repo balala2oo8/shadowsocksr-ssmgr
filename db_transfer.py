@@ -432,7 +432,7 @@ class Dbv3Transfer(DbTransfer):
 		import cymysql
 		update_transfer = {}
 
-		query_head = 'UPDATE user'
+		query_head = 'UPDATE ssr_user'
 		query_sub_when = ''
 		query_sub_when2 = ''
 		query_sub_in = None
@@ -565,7 +565,7 @@ class Dbv3Transfer(DbTransfer):
 		cur = conn.cursor()
 		try:
 			rows = []
-			cur.execute("SELECT " + ','.join(keys) + " FROM user where serverId="+str(self.cfg["node_id"]))
+			cur.execute("SELECT " + ','.join(keys) + " FROM ssr_user where serverId="+str(self.cfg["node_id"]))
 			for r in cur.fetchall():
 				d = {}
 				for column in range(len(keys)):
