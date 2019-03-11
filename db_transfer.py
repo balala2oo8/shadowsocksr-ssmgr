@@ -467,7 +467,7 @@ class Dbv3Transfer(DbTransfer):
 				del self.user_pass[id]
 				
 			save_flow += 'INSERT INTO `saveFlow`(`id`, `accountId`, `port`, `flow`, `time`) SELECT %s,accountId,%s,%s,%s FROM `account_flow` WHERE port=%s AND serverId=%s;' %(str(self.cfg["node_id"]),id,int(transfer[0])+int(transfer[1]),str(int(last_time))+'000',id,str(self.cfg["node_id"]))
-			update_ssr_user+='UPDATE ssr_user set t=%s,u=u+%s,d=d+%s where port=%s and serverId=%s;' % (str(int(last_time)),int(transfer[0]),int(transfer[1],id,str(self.cfg["node_id"]))
+			update_ssr_user += 'UPDATE ssr_user set t=%s,u=u+%s,d=d+%s where port=%s and serverId=%s;' % (str(int(last_time)),int(transfer[0]),int(transfer[1]),id,str(self.cfg["node_id"]))
 			query_sub_when += ' WHEN %s THEN u+%s' % (id, int(transfer[0] * self.cfg["transfer_mul"]))
 			query_sub_when2 += ' WHEN %s THEN d+%s' % (id, int(transfer[1] * self.cfg["transfer_mul"]))
 			update_transfer[id] = transfer
