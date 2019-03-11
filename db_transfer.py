@@ -454,6 +454,7 @@ class Dbv3Transfer(DbTransfer):
 
 		save_flow=''
         update_ssr_user=''
+		
 		for id in dt_transfer.keys():
 			transfer = dt_transfer[id]
 			bandwidth_thistime = bandwidth_thistime + transfer[0] + transfer[1]
