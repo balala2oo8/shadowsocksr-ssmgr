@@ -453,7 +453,7 @@ class Dbv3Transfer(DbTransfer):
 		conn.autocommit(True)
 
 		save_flow=''
-        update_ssr_user=''
+		update_ssr_user=''
 		
 		for id in dt_transfer.keys():
 			transfer = dt_transfer[id]
