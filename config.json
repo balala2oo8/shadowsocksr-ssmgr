@@ -22,11 +22,13 @@
             "obfs_param": ""
         }
     }, // only works under multi-user mode
-    "additional_ports_only": true, // only works under multi-user mode
+    "additional_ports_only": false, // only works under multi-user mode
     "timeout": 120,
     "udp_timeout": 60,
     "dns_ipv6": false,
     "connect_verbose_info": 0,
-    "redirect": ["*:80#127.0.0.1:1080"],
+    "redirect": [
+        "*:80#127.0.0.1:1080"
+    ],
     "fast_open": false
 }
