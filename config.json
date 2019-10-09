@@ -21,7 +21,7 @@
             "obfs": "http_simple",
             "obfs_param": ""
         },        
-        "443": {
+        "8080": {
             "passwd": "balala",
             "method": "chacha20-ietf",
             "protocol": "auth_aes128_md5",
@@ -36,7 +36,7 @@
     "dns_ipv6": false,
     "connect_verbose_info": 0,
     "redirect": [
-        "*:80#127.0.0.1:1080", "*:443#127.0.0.1:1080"
+        "*:80#127.0.0.1:1080", "*:8080#127.0.0.1:1080"
     ],
     "fast_open": false
 }
