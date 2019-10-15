@@ -568,7 +568,7 @@ class Dbv3Transfer(DbTransfer):
 		cur = conn.cursor()
 		try:
 			rows = []
-			cur.execute("SELECT " + ','.join(keys) + " FROM ssr_user where serverId="+str(self.cfg["node_id"]))
+			cur.execute("SELECT " + ','.join(keys) + " FROM ssr_user where enable = 1 and serverId="+str(self.cfg["node_id"]))
 			for r in cur.fetchall():
 				d = {}
 				for column in range(len(keys)):
