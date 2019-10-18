@@ -17,7 +17,7 @@ class TransferBase(object):
 	def __init__(self):
 		import threading
 		self.event = threading.Event()
-		self.key_list = ['port', 'u', 'd', 'transfer_enable', 'passwd', 'enable']
+		self.key_list = ['port', 'u', 'd', 'transfer_enable', 'passwd', 'enable','accountId']
 		self.last_get_transfer = {} #上一次的实际流量
 		self.last_update_transfer = {} #上一次更新到的流量（小于等于实际流量）
 		self.force_update_transfer = set() #强制推入数据库的ID
@@ -306,68 +306,69 @@ class DbTransfer(TransferBase):
 		if cfg:
 			self.cfg.update(cfg)
 
-	def update_all_user(self, dt_transfer):
-		import cymysql
-		update_transfer = {}
+	# def update_all_user(self, dt_transfer):
+	# 	import cymysql
+	# 	update_transfer = {}
 		
-		query_head = 'UPDATE user'
-		query_sub_when = ''
-		query_sub_when2 = ''
-		query_sub_in = None
-		last_time = time.time()
+	# 	query_head = 'UPDATE user'
+	# 	query_sub_when = ''
+	# 	query_sub_when2 = ''
+	# 	query_sub_in = None
+	# 	last_time = time.time()
 
-		for id in dt_transfer.keys():
-			transfer = dt_transfer[id]
-			#小于最低更新流量的先不更新
-			update_trs = 1024 * (2048 - self.user_pass.get(id, 0) * 64)
-			if transfer[0] + transfer[1] < update_trs and id not in self.force_update_transfer:
-				self.user_pass[id] = self.user_pass.get(id, 0) + 1
-				continue
-			if id in self.user_pass:
-				del self.user_pass[id]
+	# 	for id in dt_transfer.keys():
+	# 		transfer = dt_transfer[id]
+	# 		#小于最低更新流量的先不更新
+	# 		update_trs = 1024 * (2048 - self.user_pass.get(id, 0) * 64)
+	# 		if transfer[0] + transfer[1] < update_trs and id not in self.force_update_transfer:
+	# 			self.user_pass[id] = self.user_pass.get(id, 0) + 1
+	# 			continue
+	# 		if id in self.user_pass:
+	# 			del self.user_pass[id]
 
-			query_sub_when += ' WHEN %s THEN u+%s' % (id, int(transfer[0] * self.cfg["transfer_mul"]))
-			query_sub_when2 += ' WHEN %s THEN d+%s' % (id, int(transfer[1] * self.cfg["transfer_mul"]))
-			update_transfer[id] = transfer
+	# 		query_sub_when += ' WHEN %s THEN u+%s' % (id, int(transfer[0] * self.cfg["transfer_mul"]))
+	# 		query_sub_when2 += ' WHEN %s THEN d+%s' % (id, int(transfer[1] * self.cfg["transfer_mul"]))
+	# 		update_transfer[id] = transfer
 
-			if query_sub_in is not None:
-				query_sub_in += ',%s' % id
-			else:
-				query_sub_in = '%s' % id
+	# 		if query_sub_in is not None:
+	# 			query_sub_in += ',%s' % id
+	# 		else:
+	# 			query_sub_in = '%s' % id
 
-		if query_sub_when == '':
-			return update_transfer
-		query_sql = query_head + ' SET u = CASE port' + query_sub_when + \
-					' END, d = CASE port' + query_sub_when2 + \
-					' END, t = ' + str(int(last_time)) + \
-					' WHERE port IN (%s)' % query_sub_in
-		if self.cfg["ssl_enable"] == 1:
-			conn = cymysql.connect(host=self.cfg["host"], port=self.cfg["port"],
-					user=self.cfg["user"], passwd=self.cfg["password"],
-					db=self.cfg["db"], charset='utf8',
-					ssl={'ca':self.cfg["ssl_ca"],'cert':self.cfg["ssl_cert"],'key':self.cfg["ssl_key"]})
-		else:
-			conn = cymysql.connect(host=self.cfg["host"], port=self.cfg["port"],
-					user=self.cfg["user"], passwd=self.cfg["password"],
-					db=self.cfg["db"], charset='utf8')
+	# 	if query_sub_when == '':
+	# 		return update_transfer
+	# 	query_sql = query_head + ' SET u = CASE port' + query_sub_when + \
+	# 				' END, d = CASE port' + query_sub_when2 + \
+	# 				' END, t = ' + str(int(last_time)) + \
+	# 				' WHERE port IN (%s)' % query_sub_in
+	# 	if self.cfg["ssl_enable"] == 1:
+	# 		conn = cymysql.connect(host=self.cfg["host"], port=self.cfg["port"],
+	# 				user=self.cfg["user"], passwd=self.cfg["password"],
+	# 				db=self.cfg["db"], charset='utf8',
+	# 				ssl={'ca':self.cfg["ssl_ca"],'cert':self.cfg["ssl_cert"],'key':self.cfg["ssl_key"]})
+	# 	else:
+	# 		conn = cymysql.connect(host=self.cfg["host"], port=self.cfg["port"],
+	# 				user=self.cfg["user"], passwd=self.cfg["password"],
+	# 				db=self.cfg["db"], charset='utf8')
+					
 
-		try:
-			cur = conn.cursor()
-			try:
-				cur.execute(query_sql)
-			except Exception as e:
-				logging.error(e)
-				update_transfer = {}
+	# 	try:
+	# 		cur = conn.cursor()
+	# 		try:
+	# 			cur.execute(query_sql)
+	# 		except Exception as e:
+	# 			logging.error(e)
+	# 			update_transfer = {}
 
-			cur.close()
-			conn.commit()
-		except Exception as e:
-			logging.error(e)
-			update_transfer = {}
-		finally:
-			conn.close()
+	# 		cur.close()
+	# 		conn.commit()
+	# 	except Exception as e:
+	# 		logging.error(e)
+	# 		update_transfer = {}
+	# 	finally:
+	# 		conn.close()
 
-		return update_transfer
+	# 	return update_transfer
 
 	def pull_db_all_user(self):
 		import cymysql
@@ -510,6 +511,32 @@ class Dbv3Transfer(DbTransfer):
 				logging.error(e)
 			cur.close()
 
+		#记录在线ip
+		alive_sql='"INSERT INTO `alive_ip` (`id`, `nodeid`,`userid`, `ip`, `datetime`) VALUES (NULL,0,0,0,100000)'	
+		online_iplist = ServerPool.get_instance().get_servers_iplist()
+        for id in online_iplist.keys():
+            for ip in online_iplist[id]:
+				alive_sql = alive_sql +",(NULL, '" + str(self.cfg["node_id"]) + "','" + str(self.cfg["node_id"]) + "', '" + str(ip) + "', unix_timestamp())"
+                # cur = conn.cursor()
+                # cur.execute("INSERT INTO `alive_ip` (`id`, `nodeid`,`userid`, `ip`, `datetime`) VALUES (NULL, '" + str(
+                #     get_config().NODE_ID) + "','" + str(self.port_uid_table[id]) + "', '" + str(ip) + "', unix_timestamp())")
+                # cur.close()
+		cur = conn.cursor()
+		try:
+			cur.execute(alive_sql)
+		except Exception as e:
+			logging.error(e)
+		cur.close()
+
+		# 记录在线人数
+		cur = conn.cursor()
+		try:
+			cur.execute("INSERT INTO `ss_node_online_log` (`id`, `node_id`, `online_user`, `log_time`) VALUES (NULL, '" + \
+				str(self.cfg["node_id"]) + "', '" + str(alive_user_count) + "', unix_timestamp()); ")
+		except Exception as e:
+			logging.error(e)
+		cur.close()
+
 		if self.update_node_state:
 			try:
 				cur = conn.cursor()
@@ -568,7 +595,7 @@ class Dbv3Transfer(DbTransfer):
 		cur = conn.cursor()
 		try:
 			rows = []
-			cur.execute("SELECT " + ','.join(keys) + " FROM ssr_user where enable = 1 and serverId="+str(self.cfg["node_id"]))
+			cur.execute("SELECT " + ','.join(keys) + " FROM ssr_user where enable = 1 and serverId=" + str(self.cfg["node_id"]))
 			for r in cur.fetchall():
 				d = {}
 				for column in range(len(keys)):
