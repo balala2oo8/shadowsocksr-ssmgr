@@ -373,20 +373,20 @@ class ServerPool(object):
         for port in servers.keys():
 			# 是否单端口多用户
             # if servers[port]._config["is_multi_user"] == 0:
-                templist = self.get_server_iplist(port)
-                if templist != []:
-                    if port not in ret:
-                        ret[port] = templist[:]
-                    else:
-                        ret[port] = ret[port] + templist[:]
+            templist = self.get_server_iplist(port)
+            if templist != []:
+                if port not in ret:
+                    ret[port] = templist[:]
+                else:
+                    ret[port] = ret[port] + templist[:]
             # else:
-                templist2 = self.get_mu_server_iplist(port)
-                for id in templist2:
-                    for ip in templist2[id]:
-                        if id not in ret:
-                            ret[id] = []
-                        if ip not in ret[id]:
-                            tempret = ret[id][:]
-                            tempret.append(ip)
-                            ret[id] = tempret[:]
+            templist2 = self.get_mu_server_iplist(port)
+            for id in templist2:
+                for ip in templist2[id]:
+                    if id not in ret:
+                        ret[id] = []
+                    if ip not in ret[id]:
+                        tempret = ret[id][:]
+                        tempret.append(ip)
+                        ret[id] = tempret[:]
         return ret
