@@ -521,6 +521,7 @@ class Dbv3Transfer(DbTransfer):
                 # cur.execute("INSERT INTO `alive_ip` (`id`, `nodeid`,`userid`, `ip`, `datetime`) VALUES (NULL, '" + str(
                 #     get_config().NODE_ID) + "','" + str(self.port_uid_table[id]) + "', '" + str(ip) + "', unix_timestamp())")
                 # cur.close()
+				
 		cur = conn.cursor()
 		try:
 			cur.execute(alive_sql)
