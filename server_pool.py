@@ -303,18 +303,18 @@ class ServerPool(object):
 				if ip not in ret:
 					ret.append(ip)
 			self.udp_servers_pool[port].connected_iplist_clean()
-		if port in self.tcp_ipv6_servers_pool:
-			templist = self.tcp_ipv6_servers_pool[port].connected_iplist[:]
-			for ip in templist:
-				if ip not in ret:
-					ret.append(ip)
-			self.tcp_ipv6_servers_pool[port].connected_iplist_clean()
-		if port in self.udp_ipv6_servers_pool:
-			templist = self.udp_ipv6_servers_pool[port].connected_iplist[:]
-			for ip in templist:
-				if ip not in ret:
-					ret.append(ip)
-			self.udp_ipv6_servers_pool[port].connected_iplist_clean()
+		# if port in self.tcp_ipv6_servers_pool:
+		# 	templist = self.tcp_ipv6_servers_pool[port].connected_iplist[:]
+		# 	for ip in templist:
+		# 		if ip not in ret:
+		# 			ret.append(ip)
+		# 	self.tcp_ipv6_servers_pool[port].connected_iplist_clean()
+		# if port in self.udp_ipv6_servers_pool:
+		# 	templist = self.udp_ipv6_servers_pool[port].connected_iplist[:]
+		# 	for ip in templist:
+		# 		if ip not in ret:
+		# 			ret.append(ip)
+		# 	self.udp_ipv6_servers_pool[port].connected_iplist_clean()
 		return ret
 
 	def get_mu_server_iplist(self, port):
