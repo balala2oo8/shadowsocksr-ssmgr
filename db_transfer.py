@@ -517,10 +517,6 @@ class Dbv3Transfer(DbTransfer):
         for id in online_iplist.keys():
             for ip in online_iplist[id]:
 				alive_sql = alive_sql +",(NULL, '" + str(self.cfg["node_id"]) + "','" + str(self.cfg["node_id"]) + "', '" + str(ip) + "', unix_timestamp())"
-                # cur = conn.cursor()
-                # cur.execute("INSERT INTO `alive_ip` (`id`, `nodeid`,`userid`, `ip`, `datetime`) VALUES (NULL, '" + str(
-                #     get_config().NODE_ID) + "','" + str(self.port_uid_table[id]) + "', '" + str(ip) + "', unix_timestamp())")
-                # cur.close()
 
 		cur = conn.cursor()
 		try:
