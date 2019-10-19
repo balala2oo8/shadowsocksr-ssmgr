@@ -517,7 +517,6 @@ class Dbv3Transfer(DbTransfer):
         for id in online_iplist.keys():
             for ip in online_iplist[id]:
 				alive_sql = alive_sql +",(NULL, '" + str(self.cfg["node_id"]) + "','" + str(self.cfg["node_id"]) + "', '" + str(ip) + "', unix_timestamp())"
-
 		cur = conn.cursor()
 		try:
 			cur.execute(alive_sql)
