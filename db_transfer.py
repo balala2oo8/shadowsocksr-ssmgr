@@ -512,13 +512,14 @@ class Dbv3Transfer(DbTransfer):
 			cur.close()
 
 		#记录在线ip
-		alive_sql='"INSERT INTO `alive_ip` (`nodeid`,`userid`, `ip`, `datetime`) VALUES (0,0,0,100000)'	
+		alive_sql='"INSERT INTO `alive_ip` (`id`, `nodeid`,`userid`, `ip`, `datetime`) VALUES (NULL,0,0,0,100000)'	
 		online_iplist = ServerPool.get_instance().get_servers_iplist()
 		for id in online_iplist.keys():
 			for ip in online_iplist[id]:
-				alive_sql = alive_sql +",('" + str(self.cfg["node_id"]) + "','" + str(self.cfg["node_id"]) + "', '" + str(ip) + "', unix_timestamp())"
+				alive_sql = alive_sql +",(NULL, '" + str(self.cfg["node_id"]) + "','" + str(self.cfg["node_id"]) + "', '" + str(ip) + "', unix_timestamp())"
 		cur = conn.cursor()
 		try:
+			logging.error(alive_sql)
 			cur.execute(alive_sql)
 		except Exception as e:
 			logging.error(e)
@@ -527,7 +528,7 @@ class Dbv3Transfer(DbTransfer):
 		# 记录在线人数
 		cur = conn.cursor()
 		try:
-			cur.execute("INSERT INTO `ss_node_online_log` (node_id`, `online_user`, `log_time`) VALUES ('" + \
+			cur.execute("INSERT INTO `ss_node_online_log` (`id`, `node_id`, `online_user`, `log_time`) VALUES (NULL, '" + \
 				str(self.cfg["node_id"]) + "', '" + str(alive_user_count) + "', unix_timestamp()); ")
 		except Exception as e:
 			logging.error(e)
